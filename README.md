@@ -37,7 +37,7 @@ type Conn = diesel::pg::PgConnection;
 #[derive(Debug, Clone, Serialize, Deserialize, Insertable)]
 #[table_name = "users"]
 pub struct CreateUser {
-    username: String,
+    pub username: String,
 }
 
 impl Create for CreateUser {
@@ -50,8 +50,8 @@ impl Create for CreateUser {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable)]
 pub struct User {
-    id: i32,
-    username: String,
+    pub id: i32,
+    pub username: String,
 }
 
 struct GetUsers;
