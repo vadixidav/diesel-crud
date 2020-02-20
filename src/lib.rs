@@ -43,7 +43,7 @@ where
 }
 
 /// Trait which is implemented by create, update, and delete operations.
-trait Cud<BaseConnection>: Sized
+pub trait Cud<BaseConnection>: Sized
 where
     BaseConnection: diesel::connection::Connection<
             TransactionManager = diesel::connection::AnsiTransactionManager,
@@ -60,7 +60,7 @@ where
 }
 
 /// Trait for update operations which auto-implements [`Cud`].
-trait Create: Sized {
+pub trait Create: Sized {
     type Table: diesel::Table;
 
     fn table() -> Self::Table;
@@ -86,7 +86,7 @@ where
 }
 
 /// Trait which is implemented by read operations.
-trait Load<BaseConnection>: Sized
+pub trait Load<BaseConnection>: Sized
 where
     BaseConnection: diesel::connection::Connection + 'static,
 {
