@@ -1,0 +1,12 @@
+[package]
+name = "diesel-crud"
+version = "0.1.0"
+authors = ["Geordon Worley <Geordon.Worley@leidos.com>"]
+edition = "2018"
+
+[dependencies]
+diesel = { version = "1.4.3", default-features = false, features = ["r2d2"] }
+failure = "0.1.6"
+dotenv = "0.15.0"
+derive_more = "0.99.3"
+r2d2 = "0.8.8"
