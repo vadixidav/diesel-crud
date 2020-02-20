@@ -3,6 +3,13 @@ name = "diesel-crud"
 version = "0.1.0"
 authors = ["Geordon Worley <Geordon.Worley@leidos.com>"]
 edition = "2018"
+description = "Perscriptive Diesel CRUD and connection pool management"
+documentation = "https://docs.rs/diesel-crud/"
+repository = "https://github.com/vadixidav/diesel-crud"
+keywords = ["crud", "diesel", "rest"]
+categories = ["web-programming::http-server"]
+license = "MIT"
+readme = "README.md"
 
 [dependencies]
 diesel = { version = "1.4.3", default-features = false, features = ["r2d2"] }
