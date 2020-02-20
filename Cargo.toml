@@ -1,6 +1,6 @@
 [package]
 name = "diesel-crud"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Geordon Worley <Geordon.Worley@leidos.com>"]
 edition = "2018"
 description = "Perscriptive Diesel CRUD and connection pool management"
