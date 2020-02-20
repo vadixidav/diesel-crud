@@ -1,4 +1,5 @@
 use diesel::{
+    backend::UsesAnsiSavepointSyntax,
     insertable::CanInsertInSingleQuery,
     query_builder::{InsertStatement, QueryFragment},
     query_dsl::methods::{ExecuteDsl, LoadQuery},
@@ -42,13 +43,36 @@ where
     }
 }
 
+impl<BaseConnection> Db<BaseConnection>
+where
+    BaseConnection: diesel::connection::Connection<
+            TransactionManager = diesel::connection::AnsiTransactionManager,
+        > + 'static,
+    BaseConnection::Backend: UsesAnsiSavepointSyntax,
+{
+    pub fn cud<C>(&self, cud: C) -> Result<(), Error>
+    where
+        C: Cud<BaseConnection>,
+        C::Query: QueryFragment<BaseConnection::Backend> + diesel::query_builder::QueryId,
+    {
+        cud.execute(self)
+    }
+
+    pub fn load<L>(&self, load: L) -> Result<Vec<L::Item>, Error>
+    where
+        L: Load<BaseConnection>,
+    {
+        load.load(self)
+    }
+}
+
 /// Trait which is implemented by create, update, and delete operations.
 pub trait Cud<BaseConnection>: Sized
 where
     BaseConnection: diesel::connection::Connection<
             TransactionManager = diesel::connection::AnsiTransactionManager,
         > + 'static,
-    BaseConnection::Backend: diesel::backend::UsesAnsiSavepointSyntax,
+    BaseConnection::Backend: UsesAnsiSavepointSyntax,
 {
     type Query: RunQueryDsl<Connection<BaseConnection>> + ExecuteDsl<Connection<BaseConnection>>;
 
@@ -76,7 +100,7 @@ where
     BaseConnection: diesel::connection::Connection<
             TransactionManager = diesel::connection::AnsiTransactionManager,
         > + 'static,
-    BaseConnection::Backend: diesel::backend::UsesAnsiSavepointSyntax,
+    BaseConnection::Backend: UsesAnsiSavepointSyntax,
 {
     type Query = InsertStatement<Table, <Self as Insertable<Table>>::Values>;
 
