@@ -21,6 +21,26 @@ pub enum Error {
 type Pool<BaseConnection> = diesel::r2d2::Pool<ConnectionManager<BaseConnection>>;
 type Connection<BaseConnection> = PooledConnection<ConnectionManager<BaseConnection>>;
 
+pub trait CudQuery<BaseConnection>:
+    RunQueryDsl<Connection<BaseConnection>> + ExecuteDsl<Connection<BaseConnection>>
+where
+    BaseConnection: diesel::connection::Connection<
+            TransactionManager = diesel::connection::AnsiTransactionManager,
+        > + 'static,
+    BaseConnection::Backend: UsesAnsiSavepointSyntax,
+{
+}
+
+impl<T, BaseConnection> CudQuery<BaseConnection> for T
+where
+    T: RunQueryDsl<Connection<BaseConnection>> + ExecuteDsl<Connection<BaseConnection>>,
+    BaseConnection: diesel::connection::Connection<
+            TransactionManager = diesel::connection::AnsiTransactionManager,
+        > + 'static,
+    BaseConnection::Backend: UsesAnsiSavepointSyntax,
+{
+}
+
 pub struct Db<BaseConnection: diesel::connection::Connection + 'static> {
     pool: Pool<BaseConnection>,
 }
@@ -58,6 +78,13 @@ where
         cud.execute(self)
     }
 
+    pub fn cud_query<Q>(&self, query: Q) -> Result<(), Error>
+    where
+        Q: CudQuery<BaseConnection>,
+    {
+        Ok(query.execute(&self.conn()?).map(|_| ())?)
+    }
+
     pub fn load<L>(&self, load: L) -> Result<Vec<L::Item>, Error>
     where
         L: Load<BaseConnection>,
@@ -74,10 +101,10 @@ where
         > + 'static,
     BaseConnection::Backend: UsesAnsiSavepointSyntax,
 {
-    type Query: RunQueryDsl<Connection<BaseConnection>> + ExecuteDsl<Connection<BaseConnection>>;
+    type Query: CudQuery<BaseConnection>;
 
     fn execute(self, db: &Db<BaseConnection>) -> Result<(), Error> {
-        Ok(self.query().execute(&db.conn()?).map(|_| ())?)
+        db.cud_query(self.query())
     }
 
     fn query(self) -> Self::Query;
